@@ -13,7 +13,7 @@ import Profile from './pages/Profile';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div style={{ minHeight: '100vh' }}>
       <Navbar />
       <main>
         <Routes>

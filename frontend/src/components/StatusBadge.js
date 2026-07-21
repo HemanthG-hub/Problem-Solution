@@ -1,16 +1,15 @@
-const StatusBadge = ({ status }) => {
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'accepted': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+const statusConfig = {
+  pending:  { label: 'Pending',  tagClass: 'tag-yellow', icon: '⏳' },
+  accepted: { label: 'Accepted', tagClass: 'tag-green',  icon: '✓' },
+  rejected: { label: 'Rejected', tagClass: 'tag-red',    icon: '✗' },
+};
 
+const StatusBadge = ({ status }) => {
+  const config = statusConfig[status] || { label: status, tagClass: 'tag-blue', icon: '•' };
   return (
-    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(status)}`}>
-      {status}
+    <span className={`tag ${config.tagClass}`} style={{ fontWeight: 600 }}>
+      <span style={{ fontSize: 11 }}>{config.icon}</span>
+      {config.label}
     </span>
   );
 };

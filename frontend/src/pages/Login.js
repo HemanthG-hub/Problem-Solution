@@ -7,89 +7,87 @@ const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPass, setShowPass] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+    e.preventDefault(); setError(''); setLoading(true);
     try {
       const res = await api.post('/auth/login', formData);
       login(res.data.token, res.data.user);
       navigate('/');
-    } catch (error) {
-      setError(error.response?.data?.message || 'Login failed');
-    }
+    } catch (err) { setError(err.response?.data?.message || 'Invalid credentials.'); }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4">
-      <div className="w-full max-w-md animate-fade-in">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 16px', position: 'relative', overflow: 'hidden' }}>
+      <div className="orb orb-purple" style={{ width: 500, height: 500, top: -200, left: -200, opacity: 0.7 }} />
+      <div className="orb orb-pink"   style={{ width: 400, height: 400, bottom: -150, right: -150, opacity: 0.6 }} />
+
+      <div className="w-full animate-scale-in" style={{ maxWidth: 440, position: 'relative', zIndex: 1 }}>
+        <div className="glass-card" style={{ padding: 40 }}>
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-3xl">P</span>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 animate-glow"
+              style={{ background: 'linear-gradient(135deg, #6c63ff, #a855f7)' }}>
+              <span className="text-white font-black text-3xl" style={{ fontFamily: 'Space Grotesk' }}>P</span>
             </div>
-            <h2 className="text-3xl font-bold gradient-text">Welcome Back</h2>
-            <p className="text-gray-600 mt-2">Login to your account</p>
+            <h1 className="font-black mb-1" style={{ fontSize: 26, color: '#1e1e3f' }}>Welcome Back</h1>
+            <p style={{ color: '#6b7280', fontSize: 14 }}>Sign in to your ProbSol account</p>
           </div>
 
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
+          {error && <div className="alert-error animate-fade-in-fast mb-5">⚠ {error}</div>}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Email Address</label>
-              <input
-                type="email"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 transition duration-300"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="your@email.com"
-                required
-              />
+              <label className="form-label">Email Address</label>
+              <input type="email" className="input-field" value={formData.email}
+                onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="your@email.com" required />
             </div>
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Password</label>
-              <input
-                type="password"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 transition duration-300"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                placeholder="••••••••"
-                required
-              />
+              <label className="form-label">Password</label>
+              <div style={{ position: 'relative' }}>
+                <input type={showPass ? 'text' : 'password'} className="input-field" value={formData.password}
+                  onChange={e => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" required style={{ paddingRight: 48 }} />
+                <button type="button" onClick={() => setShowPass(!showPass)}
+                  style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 17 }}>
+                  {showPass ? '👁' : '🔒'}
+                </button>
+              </div>
             </div>
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg hover:shadow-lg transition duration-300 font-bold mt-6"
-              disabled={loading}
-            >
-              {loading ? 'Logging in...' : 'Login'}
+            <button type="submit" className="btn-primary" disabled={loading}
+              style={{ width: '100%', padding: '14px', fontSize: 15, marginTop: 4, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
+              {loading ? <span style={{ display:'flex',alignItems:'center',justifyContent:'center',gap:8 }}>
+                <span style={{ width:16,height:16,border:'2px solid rgba(255,255,255,0.35)',borderTopColor:'white',borderRadius:'50%',display:'inline-block',animation:'spin 0.8s linear infinite' }} />
+                Signing in...
+              </span> : 'Sign In →'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-blue-600 font-bold hover:text-blue-700">
-              Sign up
-            </Link>
-          </p>
+          <div className="divider" style={{ margin: '24px 0' }} />
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-center text-xs text-gray-500">Demo Credentials</p>
-            <p className="text-center text-xs text-gray-600 mt-2">
-              Student: <code className="bg-gray-100 px-2 py-1 rounded">alice@example.com</code>
-            </p>
-            <p className="text-center text-xs text-gray-600">Password: <code className="bg-gray-100 px-2 py-1 rounded">password123</code></p>
+          <div className="rounded-xl p-4 mb-5" style={{ background: 'rgba(108,99,255,0.05)', border: '1px solid rgba(108,99,255,0.12)' }}>
+            <p className="text-center font-semibold mb-3" style={{ color: '#6c63ff', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Demo Credentials</p>
+            <div style={{ display:'flex',flexDirection:'column',gap:6 }}>
+              <div className="flex items-center justify-between">
+                <span style={{ color:'#6b7280',fontSize:12 }}>Student:</span>
+                <code style={{ background:'rgba(108,99,255,0.07)',color:'#1e1e3f',padding:'2px 8px',borderRadius:6,fontSize:12 }}>alice@example.com</code>
+              </div>
+              <div className="flex items-center justify-between">
+                <span style={{ color:'#6b7280',fontSize:12 }}>Password:</span>
+                <code style={{ background:'rgba(108,99,255,0.07)',color:'#1e1e3f',padding:'2px 8px',borderRadius:6,fontSize:12 }}>password123</code>
+              </div>
+            </div>
           </div>
+
+          <p className="text-center" style={{ color: '#6b7280', fontSize: 14 }}>
+            Don't have an account?{' '}
+            <Link to="/register" style={{ color: '#6c63ff', fontWeight: 600, textDecoration: 'none' }}>Sign up free →</Link>
+          </p>
         </div>
       </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };
