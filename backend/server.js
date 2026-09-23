@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 
 dotenv.config();
 
@@ -9,17 +10,15 @@ const app = express();
 
 // CORS — allow production domain and local development
 const allowedOrigins = [
-  process.env.FRONTEND_URL,              // e.g. https://hemanthg.xyz from .env
+  process.env.FRONTEND_URL,
   'https://hemanthg.xyz',
   'https://www.hemanthg.xyz',
   'http://localhost:3000',
   'http://127.0.0.1:3000',
-].filter(Boolean); // remove any undefined entries
-
+].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (e.g. mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
@@ -31,13 +30,28 @@ app.use(cors({
 
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.log(err));
+const connectMongo = async () => {
+  const configuredUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/problem-platform';
+
+  try {
+    await mongoose.connect(configuredUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('MongoDB connected to configured database');
+  } catch (err) {
+    console.warn('Configured MongoDB unavailable, falling back to in-memory database.');
+    console.warn(err.message);
+
+    const memoryServer = await MongoMemoryServer.create();
+    const memoryUri = memoryServer.getUri();
+
+    await mongoose.connect(memoryUri);
+    console.log('MongoDB connected using in-memory fallback');
+  }
+};
+
+connectMongo();
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
